@@ -1,18 +1,11 @@
 #!/bin/sh -l
 
-# download Github App private key
-az config set auto-upgrade.enable=no
-private_key="github_app_private_key.pem"
-az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-az storage blob download --account-name $AZURE_STORAGE -c $AZURE_STORAGE_CONTAINER -n $AZURE_STORAGE_BLOB -f $private_key
-az logout
-
 base64url() {
   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
 }
 
 sign() {
-  openssl dgst -binary -sha256 -sign "./$private_key"
+  openssl dgst -binary -sha256 -sign "./github_app_private_key.pem"
 }
 
 header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
