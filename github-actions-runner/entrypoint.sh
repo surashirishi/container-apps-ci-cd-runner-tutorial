@@ -16,7 +16,6 @@ template='{"iss":"%s","iat":%s,"exp":%s}'
 payload="$(printf "$template" "$GITHUB_APP_ID" "$iat" "$exp" | base64url)"
 signature="$(printf '%s' "$header.$payload" | sign | base64url)"
 jwt="$header.$payload.$signature"
-rm ./$private_key
 
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/installation" \
