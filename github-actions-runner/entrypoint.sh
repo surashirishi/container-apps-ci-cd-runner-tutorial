@@ -8,8 +8,6 @@ az storage blob download --account-name $AZURE_STORAGE -c $AZURE_STORAGE_CONTAIN
 az logout
 
 # get token from Github App
-# https://zenn.dev/tmknom/articles/github-apps-token#%E3%81%8A%E3%82%8F%E3%82%8A%E3%81%AB
-# 上記のスクリプトを参考にしました
 base64url() {
   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
 }
@@ -45,7 +43,6 @@ token="$(curl --location --silent --request POST \
 )"
 
 # https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial/blob/main/github-actions-runner/entrypoint.sh
-# 上記のGithubのファイルを流用しています
 registration_token="$(curl -X POST -fsSL \
   -H 'Accept: application/vnd.github.v3+json' \
   -H "Authorization: Bearer $token" \
