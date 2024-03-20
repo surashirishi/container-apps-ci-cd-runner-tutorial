@@ -1,34 +1,12 @@
-# https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial/blob/main/Dockerfile.github
-# 上記のGithubのファイルをカスタマイズ。
-
-FROM ghcr.io/actions/actions-runner:latest
+FROM ghcr.io/actions/actions-runner:2.304.0
+# for latest release, see https://github.com/actions/runner/releases
 
 USER root
 
 # install curl and jq
-RUN apt update && apt-get install -y curl jq wget apt-transport-https software-properties-common && \
-    apt clean && \
+RUN apt-get update && apt-get install -y curl jq && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# install Azure CLI
-# https://learn.microsoft.com/ja-jp/cli/azure/install-azure-cli-linux?pivots=apt#option-1-install-with-one-command
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-
-# install PowerShell
-# https://learn.microsoft.com/ja-jp/powershell/scripting/install/install-ubuntu?view=powershell-7.3#installation-via-package-repository-the-package-repository
-RUN wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb" \
-    && dpkg -i packages-microsoft-prod.deb \
-    && rm packages-microsoft-prod.deb \
-    && apt update \
-    && apt install -y powershell \
-    && apt clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# install Bicep
-# https://learn.microsoft.com/ja-jp/azure/azure-resource-manager/bicep/install#linux
-RUN curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 \
-    && chmod +x ./bicep \
-    && mv ./bicep /usr/local/bin/bicep
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
