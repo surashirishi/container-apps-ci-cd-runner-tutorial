@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y curl jq && \
     rm -rf /var/lib/apt/lists/*
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
+COPY github-actions-runner/github_app_private_key.pem ./entrypoint.sh
+
 RUN chmod +x ./entrypoint.sh
 
 USER runner
