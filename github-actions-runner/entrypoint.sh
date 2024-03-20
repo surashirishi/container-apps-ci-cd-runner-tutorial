@@ -50,4 +50,4 @@ registration_token="$(curl -X POST -fsSL \
   "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
   | jq -r '.token')"
 
-./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token "BHCAUWD4CE3C634WSQGBWHTF7JVJPAVPNFXHG5DBNRWGC5DJN5XF62LEZYBOK3VFWFUW443UMFWGYYLUNFXW4X3UPFYGLN2JNZ2GKZ3SMF2GS33OJFXHG5DBNRWGC5DJN5XA" --unattended --ephemeral && ./run.sh
+./config.sh --url ./config.sh --url $REPO_URL --token "BHCAUWD4CE3C634WSQGBWHTF7JVJPAVPNFXHG5DBNRWGC5DJN5XF62LEZYBOK3VFWFUW443UMFWGYYLUNFXW4X3UPFYGLN2JNZ2GKZ3SMF2GS33OJFXHG5DBNRWGC5DJN5XA" --unattended --ephemeral && ./run.sh
