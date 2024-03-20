@@ -24,6 +24,7 @@ installation_id="$(curl --location --silent --request GET \
   --header "Authorization: Bearer $jwt" \
   | jq -r '.id'
 )"
+echo "installation_id is: $installation_id"
 
 token="$(curl --location --silent --request POST \
   --url "https://api.github.com/app/installations/$installation_id/access_tokens" \
@@ -32,6 +33,7 @@ token="$(curl --location --silent --request POST \
   --header "Authorization: Bearer $jwt" \
   | jq -r '.token'
 )"
+echo "token is: $token"
 
 # https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial/blob/main/github-actions-runner/entrypoint.sh
 # 上記のGithubのファイルを流用しています
@@ -41,5 +43,8 @@ registration_token="$(curl -X POST -fsSL \
   -H 'X-GitHub-Api-Version: 2022-11-28' \
   "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
   | jq -r '.token')"
+
+echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
+echo "registration_token is: $registration_token"
 
 ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
