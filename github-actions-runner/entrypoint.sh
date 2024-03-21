@@ -14,6 +14,8 @@ sign() {
   openssl dgst -binary -sha256 -sign $PEM_KEY
 }
 
+echo "PEM_KEY is: $PEM_KEY"
+
 header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
 now="$(date '+%s')"
 iat="$((now - 60))"
@@ -22,7 +24,6 @@ template='{"iss":"%s","iat":%s,"exp":%s}'
 payload="$(printf "$template" "$GITHUB_APP_ID" "$iat" "$exp" | base64url)"
 signature="$(printf '%s' "$header.$payload" | sign | base64url)"
 jwt="$header.$payload.$signature"
-rm ./$private_key
 
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/installation" \
@@ -47,5 +48,7 @@ registration_token="$(curl -X POST -fsSL \
   "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
   | jq -r '.token')"
 
+echo "registration_token is: $registration_token"
+echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
 # 取得したトークンでGithubリポジトリへアクセスします
 ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
