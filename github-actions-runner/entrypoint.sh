@@ -1,27 +1,17 @@
 #!/bin/sh -l
 
 # 以下の環境変数を利用して処理を行います。事前に container app ジョブ側の環境変数の設定が必要です。
-# $AZURE_CLIENT_ID
-# $AZURE_CLIENT_SECRET
-# $AZURE_TENANT_ID
+# $PEM_KEY
 # $GITHUB_APP_ID
 # $GITHUB_OWNER
 # $GITHUB_REPO
-# $KEYVAULT_NAME
 
-# マネージドIDの資格情報で、keyvault に格納した github app の秘密鍵を取得します。
-az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-private_key="github_app_private_key.pem"
-az keyvault secret show --name appidtoken --vault-name $KEYVAULT_NAME --query value --output tsv --subscription $SUBSCRIPTION_ID >> github_app_private_key.pem
-az logout
-
-# 以下にて、秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
+# 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
 base64url() {
   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
 }
-
 sign() {
-  openssl dgst -binary -sha256 -sign "./$private_key"
+  openssl dgst -binary -sha256 -sign $PEM_KEY
 }
 
 header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
