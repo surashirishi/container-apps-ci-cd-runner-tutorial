@@ -1,11 +1,27 @@
 #!/bin/sh -l
 
+# 以下の環境変数を利用して処理を行います。事前に container app ジョブ側の環境変数の設定が必要です。
+# $AZURE_CLIENT_ID
+# $AZURE_CLIENT_SECRET
+# $AZURE_TENANT_ID
+# $GITHUB_APP_ID
+# $GITHUB_OWNER
+# $GITHUB_REPO
+# $KEYVAULT_NAME
+
+# マネージドIDの資格情報で、keyvault に格納した github app の秘密鍵を取得します。
+az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+private_key="github_app_private_key.pem"
+az keyvault secret show --name appidtoken --vault-name $KEYVAULT_NAME --query value --output tsv --subscription $SUBSCRIPTION_ID >> github_app_private_key.pem
+az logout
+
+# 以下にて、秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
 base64url() {
   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
 }
 
 sign() {
-  openssl dgst -binary -sha256 -sign "./github_app_private_key.pem"
+  openssl dgst -binary -sha256 -sign "./$private_key"
 }
 
 header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
@@ -16,6 +32,7 @@ template='{"iss":"%s","iat":%s,"exp":%s}'
 payload="$(printf "$template" "$GITHUB_APP_ID" "$iat" "$exp" | base64url)"
 signature="$(printf '%s' "$header.$payload" | sign | base64url)"
 jwt="$header.$payload.$signature"
+rm ./$private_key
 
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/installation" \
@@ -25,8 +42,6 @@ installation_id="$(curl --location --silent --request GET \
   | jq -r '.id'
 )"
 
-echo "installation_id is: $installation_id"
-
 token="$(curl --location --silent --request POST \
   --url "https://api.github.com/app/installations/$installation_id/access_tokens" \
   --header "Accept: application/vnd.github+json" \
@@ -34,16 +49,13 @@ token="$(curl --location --silent --request POST \
   --header "Authorization: Bearer $jwt" \
   | jq -r '.token'
 )"
-echo "token is: $token"
 
-# https://github.com/Azure-Samples/container-apps-ci-cd-runner-tutorial/blob/main/github-actions-runner/entrypoint.sh
-# 上記のGithubのファイルを流用しています
 registration_token="$(curl -X POST -fsSL \
   -H 'Accept: application/vnd.github.v3+json' \
   -H "Authorization: Bearer $token" \
   -H 'X-GitHub-Api-Version: 2022-11-28' \
   "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
   | jq -r '.token')"
-echo "registration_token is: $registration_token"
 
+# 取得したトークンでGithubリポジトリへアクセスします
 ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
