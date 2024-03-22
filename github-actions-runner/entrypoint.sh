@@ -30,6 +30,9 @@ signature="$(printf '%s' "$header.$payload" | sign | base64url)"
 jwt="$header.$payload.$signature"
 rm ./github_app_private_key.pem
 
+echo "header is: $header"
+echo "payload is: $payload"
+echo "signature is: $signature"
 echo "jwt is: $jwt"
 
 installation_id="$(curl --location --silent --request GET \
