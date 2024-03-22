@@ -31,7 +31,7 @@ rm ./github_app_private_key.pem
 echo "jwt is: $jwt"
 
 installation_id="$(curl --location --silent --request GET \
-  --url "https://api.github.com/users/$GITHUB_REPO/installation" \
+  --url "https://api.github.com/users/$GITHUB_OWNER/installation" \
   --header "Accept: application/vnd.github+json" \
   --header "X-GitHub-Api-Version: 2022-11-28" \
   --header "Authorization: Bearer $jwt" \
