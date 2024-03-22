@@ -53,38 +53,48 @@ token="$(curl --location --silent --request POST \
 
 echo "token is: $token"
 
-# registration_token="$(curl -X POST -fsSL \
-#   -H 'Accept: application/vnd.github.v3+json' \
-#   -H "Authorization: Bearer $token" \
-#   -H 'X-GitHub-Api-Version: 2022-11-28' \
-#   "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
-#   | jq -r '.token')"
+registration_token="$(curl -X POST -fsSL \
+  -H 'Accept: application/vnd.github.v3+json' \
+  -H "Authorization: Bearer $token" \
+  -H 'X-GitHub-Api-Version: 2022-11-28' \
+  "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
+  | jq -r '.token')"
+echo "registration_token is: $registration_token"
+echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
 
-# echo "registration_token is: $registration_token"
-# echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
-# # 取得したトークンでGithubリポジトリへアクセスします
-# ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
+registration_token2="$(curl -X POST -fsSL \
+  -H 'Accept: application/vnd.github.v3+json' \
+  -H "Authorization: Bearer $token" \
+  -H 'X-GitHub-Api-Version: 2022-11-28' \
+  "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO2/actions/runners/registration-token" \
+  | jq -r '.token')"
+echo "registration_token is: $registration_token2"
+echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO2"
+
+# 取得したトークンでGithubリポジトリへアクセスします
+./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
+./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO2 --token $registration_token --unattended --ephemeral && ./run.sh
 
 # ',' を区切り文字として、環境変数を配列に分割
-echo "REPOS is: $REPOS"
-IFS=',' read -r -a repos_array <<< "$REPOS"
+# echo "REPOS is: $REPOS"
+# IFS=',' read -r -a repos_array <<< "$REPOS"
 
-echo "repos_array is: $repos_array"
+# echo "repos_array is: $repos_array"
 
-# 配列の要素数分だけループ
-for repo in "${repos_array[@]}"
-do
-    echo "Current variable: $repo"
-    # ここに環境変数ごとに実行したい処理を記述
-    registration_token="$(curl -X POST -fsSL \
-      -H 'Accept: application/vnd.github.v3+json' \
-      -H "Authorization: Bearer $token" \
-      -H 'X-GitHub-Api-Version: 2022-11-28' \
-      "https://api.github.com/repos/$GITHUB_OWNER/$repo/actions/runners/registration-token" \
-      | jq -r '.token')"
+# # 配列の要素数分だけループ
+# for repo in "${repos_array[@]}"
+# do
+#     echo "Current variable: $repo"
+#     # ここに環境変数ごとに実行したい処理を記述
+#     registration_token="$(curl -X POST -fsSL \
+#       -H 'Accept: application/vnd.github.v3+json' \
+#       -H "Authorization: Bearer $token" \
+#       -H 'X-GitHub-Api-Version: 2022-11-28' \
+#       "https://api.github.com/repos/$GITHUB_OWNER/$repo/actions/runners/registration-token" \
+#       | jq -r '.token')"
     
-    echo "registration_token is: $registration_token"
-    echo "url is: https://github.com/$GITHUB_OWNER/$repo"
-    # 取得したトークンでGithubリポジトリへアクセスします
-    ./config.sh --url https://github.com/$GITHUB_OWNER/$repo --token $registration_token --unattended --ephemeral && ./run.sh
-done
+#     echo "registration_token is: $registration_token"
+#     echo "url is: https://github.com/$GITHUB_OWNER/$repo"
+#     # 取得したトークンでGithubリポジトリへアクセスします
+#     ./config.sh --url https://github.com/$GITHUB_OWNER/$repo --token $registration_token --unattended --ephemeral && ./run.sh
+# done
