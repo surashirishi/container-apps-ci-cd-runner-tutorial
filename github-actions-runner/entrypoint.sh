@@ -7,7 +7,7 @@
 # $GITHUB_REPO
 
 # 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
-echo $PEM_KEY > github_app_private_key.pem
+# echo $PEM_KEY > github_app_private_key.pem
 
 base64url() {
   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
@@ -16,7 +16,7 @@ sign() {
   openssl dgst -binary -sha256 -sign ./github_app_private_key.pem
 }
 
-echo "PEM_KEY is: $PEM_KEY"
+# echo "PEM_KEY is: $PEM_KEY"
 echo "below is file github_app_private_key.pem content."
 cat ./github_app_private_key.pem
 
