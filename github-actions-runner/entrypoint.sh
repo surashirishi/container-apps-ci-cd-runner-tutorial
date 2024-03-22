@@ -28,6 +28,8 @@ signature="$(printf '%s' "$header.$payload" | sign | base64url)"
 jwt="$header.$payload.$signature"
 rm ./github_app_private_key.pem
 
+echo "jwt is: $jwt"
+
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/installation" \
   --header "Accept: application/vnd.github+json" \
