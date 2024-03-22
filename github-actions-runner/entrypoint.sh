@@ -17,6 +17,8 @@ sign() {
 }
 
 echo "PEM_KEY is: $PEM_KEY"
+echo "below is file github_app_private_key.pem content."
+cat ./github_app_private_key.pem
 
 header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
 now="$(date '+%s')"
