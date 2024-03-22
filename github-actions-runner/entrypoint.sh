@@ -28,7 +28,6 @@ template='{"iss":"%s","iat":%s,"exp":%s}'
 payload="$(printf "$template" "$GITHUB_APP_ID" "$iat" "$exp" | base64url)"
 signature="$(printf '%s' "$header.$payload" | sign | base64url)"
 jwt="$header.$payload.$signature"
-rm ./github_app_private_key.pem
 
 echo "header is: $header"
 echo "payload is: $payload"
@@ -36,7 +35,7 @@ echo "signature is: $signature"
 echo "jwt is: $jwt"
 
 installation_id="$(curl --location --silent --request GET \
-  --url "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/installation" \
+  --url "https://api.github.com/users/$GITHUB_OWNER/installation" \
   --header "Accept: application/vnd.github+json" \
   --header "X-GitHub-Api-Version: 2022-11-28" \
   --header "Authorization: Bearer $jwt" \
@@ -66,3 +65,6 @@ echo "registration_token is: $registration_token"
 echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
 # 取得したトークンでGithubリポジトリへアクセスします
 ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
+
+# リポジトリ二つ目
+./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO2 --token $registration_token --unattended --ephemeral && ./run.sh
