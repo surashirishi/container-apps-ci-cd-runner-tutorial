@@ -73,7 +73,7 @@ echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO2"
 
 # 取得したトークンでGithubリポジトリへアクセスします
 ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
-./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO2 --token $registration_token --unattended --ephemeral && ./run.sh
+./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO2 --token $registration_token2 --unattended --ephemeral && ./run.sh
 
 # ',' を区切り文字として、環境変数を配列に分割
 # echo "REPOS is: $REPOS"
