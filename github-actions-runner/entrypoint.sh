@@ -66,10 +66,13 @@ echo "token is: $token"
 # ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
 
 # ',' を区切り文字として、環境変数を配列に分割
-IFS=',' read -r -a repos <<< "$REPOS"
+echo "REPOS is: $REPOS"
+IFS=',' read -r -a repos_array <<< "$REPOS"
+
+echo "repos_array is: $repos_array"
 
 # 配列の要素数分だけループ
-for repo in "${repos[@]}"
+for repo in "${repos_array[@]}"
 do
     echo "Current variable: $repo"
     # ここに環境変数ごとに実行したい処理を記述
