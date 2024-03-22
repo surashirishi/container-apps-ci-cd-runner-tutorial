@@ -38,6 +38,8 @@ installation_id="$(curl --location --silent --request GET \
   | jq -r '.id'
 )"
 
+echo "installation_id is: $installation_id"
+
 token="$(curl --location --silent --request POST \
   --url "https://api.github.com/app/installations/$installation_id/access_tokens" \
   --header "Accept: application/vnd.github+json" \
@@ -45,6 +47,8 @@ token="$(curl --location --silent --request POST \
   --header "Authorization: Bearer $jwt" \
   | jq -r '.token'
 )"
+
+echo "token is: $token"
 
 registration_token="$(curl -X POST -fsSL \
   -H 'Accept: application/vnd.github.v3+json' \
