@@ -4,7 +4,7 @@
 # $PEM_KEY
 # $GITHUB_APP_ID
 # $GITHUB_OWNER
-# $GITHUB_REPO
+# $REPOS
 
 # 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
 # echo $PEM_KEY > github_app_private_key.pem
@@ -17,9 +17,6 @@ sign() {
 }
 
 # echo "PEM_KEY is: $PEM_KEY"
-echo "below is file github_app_private_key.pem content."
-cat ./github_app_private_key.pem
-
 header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
 now="$(date '+%s')"
 iat="$((now - 60))"
@@ -33,6 +30,8 @@ echo "header is: $header"
 echo "payload is: $payload"
 echo "signature is: $signature"
 echo "jwt is: $jwt"
+echo "below is file github_app_private_key.pem content."
+cat ./github_app_private_key.pem
 
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/users/$GITHUB_OWNER/installation" \
@@ -54,17 +53,35 @@ token="$(curl --location --silent --request POST \
 
 echo "token is: $token"
 
-registration_token="$(curl -X POST -fsSL \
-  -H 'Accept: application/vnd.github.v3+json' \
-  -H "Authorization: Bearer $token" \
-  -H 'X-GitHub-Api-Version: 2022-11-28' \
-  "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
-  | jq -r '.token')"
+# registration_token="$(curl -X POST -fsSL \
+#   -H 'Accept: application/vnd.github.v3+json' \
+#   -H "Authorization: Bearer $token" \
+#   -H 'X-GitHub-Api-Version: 2022-11-28' \
+#   "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/actions/runners/registration-token" \
+#   | jq -r '.token')"
 
-echo "registration_token is: $registration_token"
-echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
-# 取得したトークンでGithubリポジトリへアクセスします
-./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
+# echo "registration_token is: $registration_token"
+# echo "url is: https://github.com/$GITHUB_OWNER/$GITHUB_REPO"
+# # 取得したトークンでGithubリポジトリへアクセスします
+# ./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO --token $registration_token --unattended --ephemeral && ./run.sh
 
-# リポジトリ二つ目
-./config.sh --url https://github.com/$GITHUB_OWNER/$GITHUB_REPO2 --token $registration_token --unattended --ephemeral && ./run.sh
+# ',' を区切り文字として、環境変数を配列に分割
+IFS=',' read -r -a repos <<< "$REPOS"
+
+# 配列の要素数分だけループ
+for repo in "${repos[@]}"
+do
+    echo "Current variable: $repo"
+    # ここに環境変数ごとに実行したい処理を記述
+    registration_token="$(curl -X POST -fsSL \
+      -H 'Accept: application/vnd.github.v3+json' \
+      -H "Authorization: Bearer $token" \
+      -H 'X-GitHub-Api-Version: 2022-11-28' \
+      "https://api.github.com/repos/$GITHUB_OWNER/$repo/actions/runners/registration-token" \
+      | jq -r '.token')"
+    
+    echo "registration_token is: $registration_token"
+    echo "url is: https://github.com/$GITHUB_OWNER/$repo"
+    # 取得したトークンでGithubリポジトリへアクセスします
+    ./config.sh --url https://github.com/$GITHUB_OWNER/$repo --token $registration_token --unattended --ephemeral && ./run.sh
+done
