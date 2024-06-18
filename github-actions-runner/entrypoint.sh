@@ -6,8 +6,11 @@
 # $GITHUB_OWNER
 # $REPOS
 
-# 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
+# GitHub App の秘密鍵の内容をファイルに書き込み利用していきます。
 echo "$PEM_KEY" > github_app_private_key.pem
+
+# 下記 Github Docs に記載の bash スクリプトを参考に jwt を取得します。
+# https://docs.github.com/ja/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app#example-using-bash-to-generate-a-jwt
 
 set -o pipefail
 client_id=$GITHUB_APP_ID # Client ID as first argument
@@ -43,6 +46,9 @@ signature=$(
 # Create JWT
 jwt="${header_payload}"."${signature}"
 printf '%s\n' "JWT: $jwt"
+
+# 取得した jwt トークンを利用して Github App トークンを取得します。下記 Github Docs に記載の REST API を利用しています。
+# https://docs.github.com/ja/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation#using-an-installation-access-token-to-authenticate-as-an-app-installation
 
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/users/$GITHUB_OWNER/installation" \
