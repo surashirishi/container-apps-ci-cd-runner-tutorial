@@ -34,8 +34,6 @@ echo "$PEM_KEY" > github_app_private_key.pem
 # cat ./github_app_private_key.pem
 
 echo "start original sh yes."
-# 設定する値
-APP_ID="$GITHUB_APP_ID" # GitHub AppのID
 
 # JWTの有効期限（10分）
 CURRENT_TIME=$(date +%s)
@@ -43,7 +41,7 @@ EXPIRATION_TIME=$(($CURRENT_TIME + 600))
 
 # JWTのヘッダーとペイロードを作成
 HEADER=$(printf '{"alg":"RS256","typ":"JWT"}' | openssl base64 -A | tr -d '=' | tr '/+' '_-' | tr -d '\n')
-PAYLOAD=$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$CURRENT_TIME" "$EXPIRATION_TIME" "$APP_ID" | openssl base64 -A | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+PAYLOAD=$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$CURRENT_TIME" "$EXPIRATION_TIME" "$GITHUB_APP_ID" | openssl base64 -A | tr -d '=' | tr '/+' '_-' | tr -d '\n')
 
 # データを署名する
 HEADER_PAYLOAD="$HEADER.$PAYLOAD"
