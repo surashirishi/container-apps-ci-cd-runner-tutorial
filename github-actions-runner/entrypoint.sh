@@ -33,7 +33,7 @@
 # echo "below is file github_app_private_key.pem content."
 # cat ./github_app_private_key.pem
 
-echo "start original sh"
+echo "start original sh yes."
 # 設定する値
 APP_ID="$GITHUB_APP_ID" # GitHub AppのID
 
