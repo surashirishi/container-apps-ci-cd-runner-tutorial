@@ -1,13 +1,13 @@
 #!/bin/sh -l
 
-# # 以下の環境変数を利用して処理を行います。事前に container app ジョブ側の環境変数の設定が必要です。
-# # $PEM_KEY
-# # $GITHUB_APP_ID
-# # $GITHUB_OWNER
-# # $REPOS
+# 以下の環境変数を利用して処理を行います。事前に container app ジョブ側の環境変数の設定が必要です。
+# $PEM_KEY
+# $GITHUB_APP_ID
+# $GITHUB_OWNER
+# $REPOS
 
-# # 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
-# echo "$PEM_KEY" > github_app_private_key.pem
+# 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
+echo "$PEM_KEY" > github_app_private_key.pem
 
 # base64url() {
 #   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
