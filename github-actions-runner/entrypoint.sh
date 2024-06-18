@@ -1,37 +1,58 @@
 #!/bin/sh -l
 
-# 以下の環境変数を利用して処理を行います。事前に container app ジョブ側の環境変数の設定が必要です。
-# $PEM_KEY
-# $GITHUB_APP_ID
-# $GITHUB_OWNER
-# $REPOS
+# # 以下の環境変数を利用して処理を行います。事前に container app ジョブ側の環境変数の設定が必要です。
+# # $PEM_KEY
+# # $GITHUB_APP_ID
+# # $GITHUB_OWNER
+# # $REPOS
 
-# 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
-echo "$PEM_KEY" > github_app_private_key.pem
+# # 以下にて、環境変数に指定している Github Apps の秘密鍵から jwt トークンの取得 -> インストール ID の取得 -> Github App トークンを取得します。
+# echo "$PEM_KEY" > github_app_private_key.pem
 
-base64url() {
-  openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
-}
-sign() {
-  openssl dgst -binary -sha256 -sign ./github_app_private_key.pem
-}
+# base64url() {
+#   openssl enc -base64 -A | tr '+/' '-_' | tr -d '='
+# }
+# sign() {
+#   openssl dgst -binary -sha256 -sign ./github_app_private_key.pem
+# }
 
-# echo "PEM_KEY is: $PEM_KEY"
-header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
-now="$(date '+%s')"
-iat="$((now - 60))"
-exp="$((now + (3 * 60)))"
-template='{"iss":"%s","iat":%s,"exp":%s}'
-payload="$(printf "$template" "$GITHUB_APP_ID" "$iat" "$exp" | base64url)"
-signature="$(printf '%s' "$header.$payload" | sign | base64url)"
-jwt="$header.$payload.$signature"
+# # echo "PEM_KEY is: $PEM_KEY"
+# header="$(printf '{"alg":"RS256","typ":"JWT"}' | base64url)"
+# now="$(date '+%s')"
+# iat="$((now - 60))"
+# exp="$((now + (3 * 60)))"
+# template='{"iss":"%s","iat":%s,"exp":%s}'
+# payload="$(printf "$template" "$GITHUB_APP_ID" "$iat" "$exp" | base64url)"
+# signature="$(printf '%s' "$header.$payload" | sign | base64url)"
+# jwt="$header.$payload.$signature"
 
-echo "header is: $header"
-echo "payload is: $payload"
-echo "signature is: $signature"
-echo "jwt is: $jwt"
-echo "below is file github_app_private_key.pem content."
-cat ./github_app_private_key.pem
+# echo "header is: $header"
+# echo "payload is: $payload"
+# echo "signature is: $signature"
+# echo "jwt is: $jwt"
+# echo "below is file github_app_private_key.pem content."
+# cat ./github_app_private_key.pem
+
+echo "start original sh"
+# 設定する値
+APP_ID="$GITHUB_APP_ID" # GitHub AppのID
+
+# JWTの有効期限（10分）
+CURRENT_TIME=$(date +%s)
+EXPIRATION_TIME=$(($CURRENT_TIME + 600))
+
+# JWTのヘッダーとペイロードを作成
+HEADER=$(printf '{"alg":"RS256","typ":"JWT"}' | openssl base64 -A | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+PAYLOAD=$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$CURRENT_TIME" "$EXPIRATION_TIME" "$APP_ID" | openssl base64 -A | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+
+# データを署名する
+HEADER_PAYLOAD="$HEADER.$PAYLOAD"
+SIGNATURE=$(printf '%s' "$HEADER_PAYLOAD" | openssl dgst -sha256 -sign ./github_app_private_key.pem | openssl base64 -A | tr -d '=' | tr '/+' '_-' | tr -d '\n')
+
+# 完全なJWTトークンを構築する
+$jwt="$HEADER_PAYLOAD.$SIGNATURE"
+
+echo "Generated JWT: $jwt"
 
 installation_id="$(curl --location --silent --request GET \
   --url "https://api.github.com/users/$GITHUB_OWNER/installation" \
